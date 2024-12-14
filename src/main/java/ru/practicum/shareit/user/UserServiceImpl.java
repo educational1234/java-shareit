@@ -9,6 +9,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.utils.Utils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,8 +31,10 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         Utils.applyIfNotNull(userDto.getEmail(), email -> {
-            validateEmail(email);
-            user.setEmail(email);
+            if (!email.equals(user.getEmail())) {
+                validateEmail(email);
+                user.setEmail(email);
+            }
         });
 
         Utils.applyIfNotNull(userDto.getName(), user::setName);
@@ -41,7 +44,8 @@ public class UserServiceImpl implements UserService {
 
 
     private void validateEmail(String email) {
-        if (userRepository.findAll().stream().anyMatch(user -> user.getEmail().equals(email))) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
             throw new ConflictException("Email уже существует");
         }
     }
@@ -62,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long userId) {
-        if (!userRepository.findById(userId).isPresent()) {
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь не найден");
         }
         userRepository.deleteById(userId);

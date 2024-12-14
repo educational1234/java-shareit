@@ -36,4 +36,11 @@ public class ErrorHandler {
     public ErrorResponse handleForbiddenException(ForbiddenException e) {
         return new ErrorResponse(e.getMessage());
     }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGeneralException(Exception e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
 }
