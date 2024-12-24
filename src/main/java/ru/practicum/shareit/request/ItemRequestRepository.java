@@ -4,6 +4,7 @@ package ru.practicum.shareit.request;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class ItemRequestRepository {
@@ -25,10 +26,14 @@ public class ItemRequestRepository {
     public List<ItemRequest> findAllByRequestorId(Long requestorId) {
         return requests.values().stream()
                 .filter(request -> request.getRequestor().getId().equals(requestorId))
-                .toList();
+                .sorted(Comparator.comparing(ItemRequest::getCreated).reversed())
+                .collect(Collectors.toList());
     }
 
-    public List<ItemRequest> findAll() {
-        return new ArrayList<>(requests.values());
+    public List<ItemRequest> findOtherUsersRequests(Long userId) {
+        return requests.values().stream()
+                .filter(request -> !request.getRequestor().getId().equals(userId))
+                .sorted(Comparator.comparing(ItemRequest::getCreated).reversed())
+                .collect(Collectors.toList());
     }
 }

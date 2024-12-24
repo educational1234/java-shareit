@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -79,18 +80,19 @@ public class BookingService {
         return BookingMapper.toBookingDto(booking);
     }
 
-    public List<BookingDto> getUserBookings(Long userId, BookingState state) {
+    public List<BookingDto> getUserBookings(Long userId, BookingState state, Sort sort) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь не найден");
         }
 
         List<Booking> bookings = switch (state) {
-            case ALL -> bookingRepository.findAllBookingsByBookerId(userId);
-            case PAST -> bookingRepository.findPastBookingsByBookerId(userId, LocalDateTime.now());
-            case CURRENT -> bookingRepository.findCurrentBookingsByBookerId(userId, LocalDateTime.now());
-            case FUTURE -> bookingRepository.findFutureBookingsByBookerId(userId, LocalDateTime.now());
-            case WAITING -> bookingRepository.findWaitingBookingsByBookerId(userId);
-            case REJECTED -> bookingRepository.findRejectedBookingsByBookerId(userId);
+            case ALL -> bookingRepository.findByBookerId(userId, sort);
+            case PAST -> bookingRepository.findByBookerIdAndEndBefore(userId, LocalDateTime.now(), sort);
+            case CURRENT ->
+                    bookingRepository.findByBookerIdAndStartBeforeAndEndAfter(userId, LocalDateTime.now(), LocalDateTime.now(), sort);
+            case FUTURE -> bookingRepository.findByBookerIdAndStartAfter(userId, LocalDateTime.now(), sort);
+            case WAITING -> bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.WAITING, sort);
+            case REJECTED -> bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED, sort);
         };
 
         return bookings.stream()
@@ -98,18 +100,19 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
-    public List<BookingDto> getOwnerBookings(Long ownerId, BookingState state) {
+    public List<BookingDto> getOwnerBookings(Long ownerId, BookingState state, Sort sort) {
         if (!userRepository.existsById(ownerId)) {
             throw new NotFoundException("Пользователь не найден");
         }
 
         List<Booking> bookings = switch (state) {
-            case ALL -> bookingRepository.findAllBookingsByOwnerId(ownerId);
-            case PAST -> bookingRepository.findPastBookingsByOwnerId(ownerId, LocalDateTime.now());
-            case CURRENT -> bookingRepository.findCurrentBookingsByOwnerId(ownerId, LocalDateTime.now());
-            case FUTURE -> bookingRepository.findFutureBookingsByOwnerId(ownerId, LocalDateTime.now());
-            case WAITING -> bookingRepository.findWaitingBookingsByOwnerId(ownerId);
-            case REJECTED -> bookingRepository.findRejectedBookingsByOwnerId(ownerId);
+            case ALL -> bookingRepository.findByItemOwnerId(ownerId, sort);
+            case PAST -> bookingRepository.findByItemOwnerIdAndEndBefore(ownerId, LocalDateTime.now(), sort);
+            case CURRENT ->
+                    bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfter(ownerId, LocalDateTime.now(), LocalDateTime.now(), sort);
+            case FUTURE -> bookingRepository.findByItemOwnerIdAndStartAfter(ownerId, LocalDateTime.now(), sort);
+            case WAITING -> bookingRepository.findByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING, sort);
+            case REJECTED -> bookingRepository.findByItemOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, sort);
         };
 
         return bookings.stream()

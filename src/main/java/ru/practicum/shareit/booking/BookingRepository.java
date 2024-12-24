@@ -1,68 +1,40 @@
 package ru.practicum.shareit.booking;
 
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    @Query("SELECT b FROM Booking b WHERE b.item.id = ?1 AND b.end < CURRENT_TIMESTAMP ORDER BY b.end DESC")
-    Optional<Booking> findLastBooking(Long itemId);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.id = ?1 AND b.start > CURRENT_TIMESTAMP ORDER BY b.start ASC")
-    Optional<Booking> findNextBooking(Long itemId);
+    List<Booking> findByBookerId(Long bookerId, Sort sort);
 
-    //Все бронирования
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId ORDER BY b.start DESC")
-    List<Booking> findAllBookingsByBookerId(@Param("bookerId") Long bookerId);
+    List<Booking> findByBookerIdAndEndBefore(Long bookerId, LocalDateTime now, Sort sort);
 
-    //Прошедшие
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.end < :now ORDER BY b.start DESC")
-    List<Booking> findPastBookingsByBookerId(@Param("bookerId") Long bookerId, @Param("now") LocalDateTime now);
+    List<Booking> findByBookerIdAndStartBeforeAndEndAfter(Long bookerId, LocalDateTime now1, LocalDateTime now2, Sort sort);
 
-    //Текущие
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.start <= :now AND b.end >= :now ORDER BY b.start DESC")
-    List<Booking> findCurrentBookingsByBookerId(@Param("bookerId") Long bookerId, @Param("now") LocalDateTime now);
+    List<Booking> findByBookerIdAndStartAfter(Long bookerId, LocalDateTime now, Sort sort);
 
-    //Будущие
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.start > :now ORDER BY b.start DESC")
-    List<Booking> findFutureBookingsByBookerId(@Param("bookerId") Long bookerId, @Param("now") LocalDateTime now);
+    List<Booking> findByBookerIdAndStatus(Long bookerId, BookingStatus status, Sort sort);
 
-    //Ожидающие
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.status = 'WAITING' ORDER BY b.start DESC")
-    List<Booking> findWaitingBookingsByBookerId(@Param("bookerId") Long bookerId);
+    List<Booking> findByItemOwnerId(Long ownerId, Sort sort);
 
-    //Отклоненные
-    @Query("SELECT b FROM Booking b WHERE b.booker.id = :bookerId AND b.status = 'REJECTED' ORDER BY b.start DESC")
-    List<Booking> findRejectedBookingsByBookerId(@Param("bookerId") Long bookerId);
+    List<Booking> findByItemOwnerIdAndEndBefore(Long ownerId, LocalDateTime now, Sort sort);
 
-    ///Для владельца
-    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId ORDER BY b.start DESC")
-    List<Booking> findAllBookingsByOwnerId(@Param("ownerId") Long ownerId);
+    List<Booking> findByItemOwnerIdAndStartBeforeAndEndAfter(Long ownerId, LocalDateTime now1, LocalDateTime now2, Sort sort);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId AND b.end < :now ORDER BY b.start DESC")
-    List<Booking> findPastBookingsByOwnerId(@Param("ownerId") Long ownerId, @Param("now") LocalDateTime now);
+    List<Booking> findByItemOwnerIdAndStartAfter(Long ownerId, LocalDateTime now, Sort sort);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId AND b.start <= :now AND b.end >= :now ORDER BY b.start DESC")
-    List<Booking> findCurrentBookingsByOwnerId(@Param("ownerId") Long ownerId, @Param("now") LocalDateTime now);
+    List<Booking> findByItemOwnerIdAndStatus(Long ownerId, BookingStatus status, Sort sort);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId AND b.start > :now ORDER BY b.start DESC")
-    List<Booking> findFutureBookingsByOwnerId(@Param("ownerId") Long ownerId, @Param("now") LocalDateTime now);
+    List<Booking> findByItemIdAndEndBefore(Long itemId, LocalDateTime end, Sort sort);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId AND b.status = 'WAITING' ORDER BY b.start DESC")
-    List<Booking> findWaitingBookingsByOwnerId(@Param("ownerId") Long ownerId);
+    List<Booking> findByItemIdAndStartAfter(Long itemId, LocalDateTime start, Sort sort);
 
-    @Query("SELECT b FROM Booking b WHERE b.item.owner.id = :ownerId AND b.status = 'REJECTED' ORDER BY b.start DESC")
-    List<Booking> findRejectedBookingsByOwnerId(@Param("ownerId") Long ownerId);
+    List<Booking> findByItemIdAndBookerIdAndEndBefore(Long itemId, Long bookerId, LocalDateTime end, Sort sort);
 
-    @Query("SELECT b FROM Booking b " +
-            "WHERE b.booker.id = :userId AND b.item.id = :itemId " +
-            "AND b.end < CURRENT_TIMESTAMP AND b.status = 'APPROVED'")
-    List<Booking> findPastBookingsForItemAndUser(@Param("itemId") Long itemId, @Param("userId") Long userId);
 
 }

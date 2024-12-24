@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingState;
@@ -37,13 +38,19 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getUserBookings(@RequestHeader(value = "X-Sharer-User-Id", required = true) Long userId,
-                                            @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getUserBookings(userId, BookingState.valueOf(state));
+                                            @RequestParam(defaultValue = "ALL") String state,
+                                            @RequestParam(defaultValue = "start") String sortBy,
+                                            @RequestParam(defaultValue = "desc") String order) {
+        Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
+        return bookingService.getUserBookings(userId, BookingState.valueOf(state), sort);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getOwnerBookings(@RequestHeader(value = "X-Sharer-User-Id", required = true) Long ownerId,
-                                             @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getOwnerBookings(ownerId, BookingState.valueOf(state));
+                                             @RequestParam(defaultValue = "ALL") String state,
+                                             @RequestParam(defaultValue = "start") String sortBy,
+                                             @RequestParam(defaultValue = "desc") String order) {
+        Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
+        return bookingService.getOwnerBookings(ownerId, BookingState.valueOf(state), sort);
     }
 }

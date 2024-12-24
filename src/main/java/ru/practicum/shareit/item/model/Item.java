@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 @Entity
@@ -27,6 +28,9 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
-    @Column(name = "request_id")
-    private Long request;
+    //@Column(name = "request_id")
+    //private Long request;
+    @ManyToOne
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
 }

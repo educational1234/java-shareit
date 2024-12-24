@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
 import ru.practicum.shareit.item.dto.ItemWithCommentsDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import java.util.Collections;
@@ -21,7 +22,7 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.isAvailable(),
-                item.getRequest(),
+                item.getRequest().getId(),
                 null,
                 null,
                 Collections.emptyList()
@@ -34,19 +35,39 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.isAvailable(),
-                item.getRequest(),
+                item.getRequest().getId(),
                 Collections.emptyList()
         );
     }
 
-    public static Item toItem(ItemDto itemDto, User ownerId) {
-        return new Item(
+    public static Item toItem(ItemDto itemDto, User owner) {
+        Item item = new Item(
                 itemDto.getId(),
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
-                ownerId,
-                itemDto.getRequestId()
+                owner,
+               null
+               // itemDto.getRequestId()
+        );
+        if (itemDto.getRequestId() != null) {
+            ItemRequest request = new ItemRequest();
+            request.setId(itemDto.getRequestId());
+            item.setRequest(request);
+        }
+
+        return item;
+    }
+    public static ItemDto toItemDto(Item item) {
+        return new ItemDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.isAvailable(),
+                item.getRequest() != null ? item.getRequest().getId() : null,
+                null, // Last booking
+                null, // Next booking
+                null  // Comments
         );
     }
 }
